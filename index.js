@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
-const sequelize = require("./utils/databaseConnection")
+const sequelize = require("./utils/databaseConnection");
+// You must import all the models that youy define for your sync to work in the same file where you will invoke sequelize.sync method
+const Product = require("./models/product");
+const productRouter = require("./routes/productRoutes")
 
 
 const app = express();
@@ -11,21 +14,18 @@ app.use(cors());
 
 
 
-(async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
-  } catch (error) {
-    console.error('Unable to connect to the database:', error);
-  }  
-})()
 
+
+// Express Routers
+app.use("/products", productRouter);
 
 
 
 app.get("/", async(req, res) => {
     res.send("<h1>Hello</h1>")
 })
+
+
 
 
 
@@ -40,6 +40,13 @@ app.get("/", async(req, res) => {
 // })
 
 
-app.listen((5000), () => {
 
-})
+
+sequelize.sync()
+  .then(() => {
+    app.listen(5000);
+    console.log('Connection has been established successfully & your DB is in sync with your models');
+  })
+  .catch((err) => {
+    console.error('Unable to connect to the database:', err);
+  })
