@@ -1,9 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const sequelize = require("./utils/databaseConnection");
-// You must import all the models that youy define for your sync to work in the same file where you will invoke sequelize.sync method
-const Product = require("./models/product");
-const productRouter = require("./routes/productRoutes")
+const productRouter = require("./routes/productRoutes");
 
 
 const app = express();
@@ -23,6 +21,18 @@ app.use("/products", productRouter);
 
 app.get("/", async(req, res) => {
     res.send("<h1>Hello</h1>")
+})
+
+
+
+app.get("/get-a-single-product-from-cart-to-test-join-from-multiple-table", async (req, res) => {
+  try{
+    const dbResponse = await sequelize.query("select products.title, products.price, products.description, users.userName, users.email, qty FROM cart INNER JOIN products ON cart.pid = products.id INNER JOIN users ON cart.uid = users.id");
+    console.log(dbResponse);
+    res.status(200).send({data: dbResponse});
+  }catch(error){
+    res.status(400).send({msg: "Unable to execute your query", error: error})
+  }
 })
 
 
